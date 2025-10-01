@@ -4,8 +4,7 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   plugins: [
     react({
-      jsxRuntime: 'automatic',
-      fastRefresh: false  // Disable Fast Refresh to avoid CSP issues
+      jsxRuntime: 'automatic'
     })
   ],
   server: {
@@ -13,7 +12,7 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
-    minify: 'terser',
+    minify: 'esbuild',
     sourcemap: false
   }
 })
