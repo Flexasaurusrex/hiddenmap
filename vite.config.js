@@ -2,18 +2,18 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react({
+      jsxRuntime: 'automatic',
+      fastRefresh: false  // Disable Fast Refresh to avoid CSP issues
+    })
+  ],
   server: {
-    port: 3000,
-    proxy: {
-      '/api': {
-        target: 'http://localhost:3000',
-        changeOrigin: true
-      }
-    }
+    port: 3000
   },
   build: {
     outDir: 'dist',
-    sourcemap: true
+    minify: 'terser',
+    sourcemap: false
   }
 })
