@@ -544,7 +544,7 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-black text-gray-100">
-      {showSlideshow ? (
+      {showSlideshow && selectedObject ? (
         <SlideshowView object={selectedObject} exitSlideshow={exitSlideshow} />
       ) : (
         <>
@@ -555,7 +555,7 @@ const App = () => {
               customObjects={customObjects}
             />
           )}
-          {view === 'object' && (
+          {view === 'object' && selectedObject && (
             <ObjectView 
               object={selectedObject} 
               dissolveAnimation={dissolveAnimation}
@@ -565,20 +565,20 @@ const App = () => {
               startSlideshow={startSlideshow}
             />
           )}
-          {view === 'metal' && (
+          {view === 'metal' && selectedMetal && (
             <MetalDetail 
               metal={selectedMetal} 
-              objectName={selectedObject.name}
+              objectName={selectedObject?.name || 'Object'}
               setView={setView}
             />
           )}
-          {view === 'map' && (
+          {view === 'map' && selectedObject && (
             <WorldMapView 
               object={selectedObject}
               setView={setView}
             />
           )}
-          {view === 'reflection' && (
+          {view === 'reflection' && selectedObject && (
             <ReflectionView 
               object={selectedObject}
               resetApp={resetApp}
