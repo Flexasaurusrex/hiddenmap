@@ -1012,17 +1012,14 @@ const ObjectPromptModal = ({ onClose, onGenerate }) => {
       // Add icon immediately after parsing
       objectData.icon = Sparkles;
 
+      setLoading(false);
+      setStage('complete');
+
       // Generate URL-safe key
       const objectKey = input.toLowerCase().replace(/\s+/g, '_');
       
-      // Add to custom objects first
-      addCustomObject(objectKey, objectData);
-      
-      // Then close modal and select it
-      setLoading(false);
-      setStage('complete');
-      onClose();
-      selectObject(objectKey);
+      // Pass to parent through callback
+      onGenerate(objectKey, objectData);
 
     } catch (error) {
       console.error('Error generating object:', error);
