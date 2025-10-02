@@ -1020,6 +1020,9 @@ const ObjectPromptModal = ({ onClose, onGenerate }) => {
       
       // Pass to parent through callback
       onGenerate(objectKey, objectData);
+      
+      // CLOSE THE MODAL - THIS WAS THE MISSING LINE!
+      onClose();
 
     } catch (error) {
       console.error('Error generating object:', error);
