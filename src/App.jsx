@@ -736,7 +736,7 @@ const SlideshowView = ({ object, exitSlideshow }) => {
 };
 
 const OpeningSlide = ({ content }) => {
-  const IconComponent = content.icon;
+  const IconComponent = content.icon || Sparkles;
   return (
     <div className="max-w-4xl px-8 text-center space-y-8 relative">
       {content.heroImage === "ai-generated" && (
@@ -1136,6 +1136,8 @@ const ObjectPromptModal = ({ onClose, onGenerate }) => {
 };
 
 const ObjectView = ({ object, dissolveAnimation, setView, setSelectedMetal, resetApp, startSlideshow }) => {
+  const IconComponent = object.icon || Sparkles;
+  
   return (
     <div className="min-h-screen p-8">
       <button
@@ -1148,7 +1150,7 @@ const ObjectView = ({ object, dissolveAnimation, setView, setSelectedMetal, rese
 
       <div className="max-w-6xl mx-auto space-y-16">
         <div className={`text-center space-y-6 transition-all duration-1000 ${dissolveAnimation ? 'opacity-100' : 'opacity-0'}`}>
-          <object.icon className="w-24 h-24 mx-auto text-cyan-400" />
+          <IconComponent className="w-24 h-24 mx-auto text-cyan-400" />
           <h1 className="text-5xl font-bold">{object.name}</h1>
           <p className="text-2xl text-gray-300">{object.tagline}</p>
           <p className="text-lg text-gray-400 max-w-3xl mx-auto leading-relaxed">
@@ -1170,7 +1172,7 @@ const ObjectView = ({ object, dissolveAnimation, setView, setSelectedMetal, rese
               dissolveAnimation ? 'opacity-20 blur-sm' : 'opacity-100'
             }`}
           >
-            <object.icon className="w-48 h-48 text-gray-600" />
+            <IconComponent className="w-48 h-48 text-gray-600" />
           </div>
           
           {dissolveAnimation && (
