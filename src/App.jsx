@@ -883,7 +883,7 @@ const HomeView = ({ selectObject, addCustomObject, customObjects }) => {
           <p>An educational experience by artists, for artists.</p>
           <p className="mt-2">Every object is a portal. Every material is a story.</p>
           <p className="mt-4 text-xs text-purple-400">
-            ✨ Powered by Together.ai for infinite object discovery
+            Powered by Together.ai for infinite object discovery
           </p>
         </div>
       </div>
@@ -902,42 +902,34 @@ const ObjectPromptModal = ({ onClose, onGenerate }) => {
     setLoading(true);
     setStage('generating');
 
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    try {
+      const response = await fetch('/api/generate-object', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          objectName: input.trim()
+        })
+      });
 
-    const mockObject = {
-      name: input.charAt(0).toUpperCase() + input.slice(1),
-      icon: Sparkles,
-      tagline: `Every ${input} tells a story of global extraction`,
-      description: `This AI-generated breakdown reveals the hidden metals and materials inside your ${input}. From rare earth elements to common metals, each component carries the weight of planetary mining networks.`,
-      heroImage: "ai-generated",
-      metals: [
-        {
-          name: "Sample Metal",
-          symbol: "Sm",
-          emoji: "⚡",
-          function: `Essential component in ${input} that enables its primary function.`,
-          journey: "Mined globally from various sources.",
-          impact: "Environmental and social impacts vary by region.",
-          wonder: `The ${input} in your hand carries the story of Earth's elements.`,
-          locations: ["Global", "Various", "Regions"],
-          visualImage: "ai-generated"
-        }
-      ],
-      footprint: {
-        countries: 15,
-        water: "Variable liters",
-        co2: "Variable kg",
-        laborHours: 50,
-        conflictMinerals: 1,
-        recyclable: "Partially recyclable—depends on component materials."
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
       }
-    };
 
-    setLoading(false);
-    setStage('complete');
+      const objectData = await response.json();
 
-    const objectKey = input.toLowerCase().replace(/\s+/g, '_');
-    onGenerate(objectKey, mockObject);
+      setLoading(false);
+      setStage('complete');
+
+      const objectKey = input.toLowerCase().replace(/\s+/g, '_');
+      onGenerate(objectKey, objectData);
+
+    } catch (error) {
+      console.error('Error generating object:', error);
+      setLoading(false);
+      setStage('error');
+    }
   };
 
   return (
@@ -993,7 +985,7 @@ const ObjectPromptModal = ({ onClose, onGenerate }) => {
 
             <div className="bg-purple-900/20 border border-purple-500/30 rounded-lg p-4">
               <p className="text-sm text-gray-400">
-                <strong className="text-purple-400">Note:</strong> This demo uses mock data. In production, Together.ai would generate real material breakdowns with scientific accuracy, mining locations, and impact data.
+                <strong className="text-purple-400">Note:</strong> Generation uses Together.ai's LLM to analyze material composition and generate real data. First generation may take 5-10 seconds.
               </p>
             </div>
           </>
@@ -1026,6 +1018,29 @@ const ObjectPromptModal = ({ onClose, onGenerate }) => {
             <p className="text-sm text-gray-500">
               AI is analyzing material databases, mining records, and supply chain data...
             </p>
+          </div>
+        )}
+
+        {stage === 'error' && (
+          <div className="py-12 text-center space-y-6">
+            <X className="w-16 h-16 mx-auto text-red-400" />
+            <div className="space-y-3">
+              <h3 className="text-2xl font-semibold text-red-400">Generation Failed</h3>
+              <p className="text-gray-400">
+                There was an error generating the material breakdown. This could be due to:
+              </p>
+              <ul className="text-sm text-gray-500 space-y-1 max-w-md mx-auto text-left">
+                <li>• Missing or invalid Together.ai API key</li>
+                <li>• Network connectivity issues</li>
+                <li>• Rate limit exceeded</li>
+              </ul>
+            </div>
+            <button
+              onClick={() => setStage('input')}
+              className="bg-gray-700 hover:bg-gray-600 px-8 py-4 rounded-lg transition-colors"
+            >
+              Try Again
+            </button>
           </div>
         )}
       </div>
