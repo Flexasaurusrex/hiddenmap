@@ -1,4 +1,4 @@
-# The Hidden Map
+# The Hidden Map!
 
 > Revealing the elemental stories inside everything
 
