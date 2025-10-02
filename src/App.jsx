@@ -1009,11 +1009,11 @@ const ObjectPromptModal = ({ onClose, onGenerate }) => {
 
       const objectData = await response.json();
 
-      setLoading(false);
-      setStage('complete');
-
       // Add icon for rendering (AI-generated objects use Sparkles icon)
       objectData.icon = Sparkles;
+
+      setLoading(false);
+      setStage('complete');
 
       const objectKey = input.toLowerCase().replace(/\s+/g, '_');
       onGenerate(objectKey, objectData);
