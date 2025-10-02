@@ -599,7 +599,7 @@ const SlideshowView = ({ object, exitSlideshow }) => {
     {
       type: 'opening',
       content: {
-        icon: object.icon,
+        icon: object.icon || Sparkles,
         title: object.name,
         tagline: object.tagline,
         description: object.description,
