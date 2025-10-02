@@ -918,22 +918,25 @@ const HomeView = ({ selectObject, addCustomObject, customObjects }) => {
         <div>
           <h2 className="text-2xl font-semibold mb-6 text-center">Featured Objects</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Object.entries(objectsDatabase).map(([key, obj]) => (
-              <button
-                key={key}
-                onClick={() => selectObject(key)}
-                className="group relative bg-gray-800/50 backdrop-blur border border-gray-700 rounded-xl p-8 hover:border-cyan-500 transition-all duration-300 hover:bg-gray-800/70 hover:scale-105"
-              >
-                <div className="flex flex-col items-center space-y-4">
-                  <obj.icon className="w-16 h-16 text-cyan-400 group-hover:text-cyan-300 transition-colors" />
-                  <h3 className="text-xl font-semibold">{obj.name}</h3>
-                  <p className="text-sm text-gray-400 text-center leading-relaxed">
-                    {obj.tagline}
-                  </p>
-                </div>
-                <div className="absolute inset-0 bg-cyan-500/0 group-hover:bg-cyan-500/5 rounded-xl transition-colors" />
-              </button>
-            ))}
+            {Object.entries(objectsDatabase).map(([key, obj]) => {
+              const IconComponent = obj.icon || Sparkles;
+              return (
+                <button
+                  key={key}
+                  onClick={() => selectObject(key)}
+                  className="group relative bg-gray-800/50 backdrop-blur border border-gray-700 rounded-xl p-8 hover:border-cyan-500 transition-all duration-300 hover:bg-gray-800/70 hover:scale-105"
+                >
+                  <div className="flex flex-col items-center space-y-4">
+                    <IconComponent className="w-16 h-16 text-cyan-400 group-hover:text-cyan-300 transition-colors" />
+                    <h3 className="text-xl font-semibold">{obj.name}</h3>
+                    <p className="text-sm text-gray-400 text-center leading-relaxed">
+                      {obj.tagline}
+                    </p>
+                  </div>
+                  <div className="absolute inset-0 bg-cyan-500/0 group-hover:bg-cyan-500/5 rounded-xl transition-colors" />
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -944,21 +947,24 @@ const HomeView = ({ selectObject, addCustomObject, customObjects }) => {
               Your Generated Objects
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {Object.entries(customObjects).map(([key, obj]) => (
-                <button
-                  key={key}
-                  onClick={() => selectObject(key)}
-                  className="group relative bg-gradient-to-br from-purple-900/30 to-cyan-900/30 backdrop-blur border border-purple-500/30 rounded-xl p-8 hover:border-purple-400 transition-all duration-300 hover:scale-105"
-                >
-                  <div className="flex flex-col items-center space-y-4">
-                    <Sparkles className="w-16 h-16 text-purple-400 group-hover:text-purple-300 transition-colors" />
-                    <h3 className="text-xl font-semibold">{obj.name}</h3>
-                    <p className="text-sm text-gray-400 text-center leading-relaxed">
-                      {obj.tagline}
-                    </p>
-                  </div>
-                </button>
-              ))}
+              {Object.entries(customObjects).map(([key, obj]) => {
+                const IconComponent = obj.icon || Sparkles;
+                return (
+                  <button
+                    key={key}
+                    onClick={() => selectObject(key)}
+                    className="group relative bg-gradient-to-br from-purple-900/30 to-cyan-900/30 backdrop-blur border border-purple-500/30 rounded-xl p-8 hover:border-purple-400 transition-all duration-300 hover:scale-105"
+                  >
+                    <div className="flex flex-col items-center space-y-4">
+                      <IconComponent className="w-16 h-16 text-purple-400 group-hover:text-purple-300 transition-colors" />
+                      <h3 className="text-xl font-semibold">{obj.name}</h3>
+                      <p className="text-sm text-gray-400 text-center leading-relaxed">
+                        {obj.tagline}
+                      </p>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
           </div>
         )}
