@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Smartphone, Car, Shirt, Laptop, Sun, MapPin, Factory, Droplets, Flame, Users, Globe, ArrowLeft, ChevronRight, X, Play, Pause, SkipForward, Sparkles, Loader } from 'lucide-react';
+import { Smartphone, Car, Shirt, Laptop, Sun, Wind, MapPin, Factory, Droplets, Flame, Users, Globe, ArrowLeft, ChevronRight, X, Play, Pause, SkipForward, Sparkles, Loader } from 'lucide-react';
 
 // Complete database of hero objects and their metals
 const objectsDatabase = {
@@ -409,6 +409,90 @@ const objectsDatabase = {
       laborHours: 45,
       conflictMinerals: 1,
       recyclable: "95% by weight—but recycling infrastructure is immature. Most decommissioned panels end up in landfills."
+    }
+  },
+  
+  windturbine: {
+    name: "Wind Turbine",
+    icon: Wind,
+    tagline: "Renewable energy built from 200 tons of extraction",
+    description: "A single wind turbine promises clean, infinite energy from moving air. Yet standing 300 feet tall, each turbine requires more metal, concrete, and rare earth magnets than a small building—a massive material investment for the carbon-free future.",
+    heroImage: "ai-generated",
+    metals: [
+      {
+        name: "Neodymium",
+        symbol: "Nd",
+        emoji: "🧲",
+        function: "Creates the permanent magnets in direct-drive generators. One turbine uses 600 kg of neodymium—enabling magnetic generation without mechanical gearboxes.",
+        journey: "Same toxic rare earth mining in China's Bayan Obo as phones and EVs. Scaled to industrial quantities for each turbine.",
+        impact: "600 kg means 6,000 times the neodymium of a smartphone. Radioactive thorium waste, toxic lakes, cancer clusters—all multiplied by the scale of wind farms.",
+        wonder: "The silent spin that powers cities is built on the same contaminated ground that poisons mining villages.",
+        locations: ["China", "USA", "Myanmar"],
+        visualImage: "ai-generated"
+      },
+      {
+        name: "Copper",
+        symbol: "Cu",
+        emoji: "🔌",
+        function: "Forms the generator coils, transformers, and miles of transmission cables. Each turbine contains 4.5 tons of copper.",
+        journey: "Chilean Atacama mines, again. Wind energy is also copper-intensive energy. A wind farm is a copper extraction project.",
+        impact: "4.5 tons per turbine. A 100-turbine farm = 450 tons of copper = 56 million liters of water from the driest desert on Earth.",
+        wonder: "Wind power and solar power compete for the same Chilean water, both promising to save the climate while draining ancient aquifers.",
+        locations: ["Chile", "Peru", "USA"],
+        visualImage: "ai-generated"
+      },
+      {
+        name: "Iron",
+        symbol: "Fe",
+        emoji: "⚙️",
+        function: "The structural steel that forms the tower, nacelle housing, and internal frame. Each turbine uses 200-300 tons of iron and steel.",
+        journey: "Iron ore mined in Australia, Brazil, China. Smelted in blast furnaces—among the most carbon-intensive industrial processes.",
+        impact: "Wind turbines require massive steel foundations and towers. Producing 1 ton of steel generates 1.8 tons of CO₂. Each turbine = 360-540 tons of CO₂ before it produces any clean energy.",
+        wonder: "The carbon payback period for a wind turbine is 6-18 months. After that, it's clean. But that first year is fossil-fueled steel.",
+        locations: ["Australia", "Brazil", "China"],
+        visualImage: "ai-generated"
+      },
+      {
+        name: "Fiberglass",
+        symbol: "SiO₂",
+        emoji: "💨",
+        function: "Forms the massive blades—each 150 feet long. Fiberglass composite is lightweight, strong, and can withstand hurricane-force winds.",
+        journey: "Made from silica sand, petroleum-based resins, and chemical hardeners. Blade manufacturing is specialized, done in massive facilities.",
+        impact: "Fiberglass blades are not recyclable. When turbines are decommissioned (20-25 year lifespan), blades are cut up and landfilled. Tens of thousands of blades reach end-of-life in the 2020s.",
+        wonder: "The wind turbine blade graveyard is real—acres of 150-foot sections buried in Wyoming and Texas. Clean energy with a 20-year expiration date.",
+        locations: ["USA", "China", "Europe"],
+        visualImage: "ai-generated"
+      },
+      {
+        name: "Rare Earths",
+        symbol: "REE",
+        emoji: "🌏",
+        function: "Dysprosium, praseodymium, and other rare earths enhance magnet strength and high-temperature performance in generators.",
+        journey: "Extracted alongside neodymium from Chinese rare earth mines. Separation requires hydrofluoric acid and generates radioactive waste.",
+        impact: "Wind turbines accelerated rare earth demand alongside EVs and electronics. China's monopoly on refining gives geopolitical leverage over the entire renewable transition.",
+        wonder: "Every green energy revolution passes through China's toxic rare earth refineries. There is no clean path that doesn't run through contaminated ground.",
+        locations: ["China", "USA", "Australia"],
+        visualImage: "ai-generated"
+      },
+      {
+        name: "Zinc",
+        symbol: "Zn",
+        emoji: "🛡️",
+        function: "Galvanizes steel components to prevent corrosion. Offshore wind turbines are constantly exposed to saltwater and require heavy zinc coating.",
+        journey: "Mined as sphalerite ore in China, Peru, Australia. Refined through roasting and electrolysis.",
+        impact: "Zinc mining produces sulfuric acid waste and heavy metal contamination. Smelting releases sulfur dioxide. Offshore wind's corrosion demands mean massive zinc consumption.",
+        wonder: "The invisible armor that keeps wind turbines from rusting into the sea is zinc—mined, refined, and applied in toxic processes so the turbine can spin cleanly for decades.",
+        locations: ["China", "Peru", "Australia"],
+        visualImage: "ai-generated"
+      }
+    ],
+    footprint: {
+      countries: 32,
+      water: "2.1 million liters (per turbine, mostly in steel and copper production)",
+      co2: "500 tons (per turbine production, offset within 6-18 months)",
+      laborHours: 8500,
+      conflictMinerals: 2,
+      recyclable: "85% by weight (steel, copper)—but blades are not recyclable and end up in landfills"
     }
   }
 };
@@ -921,6 +1005,9 @@ const ObjectPromptModal = ({ onClose, onGenerate }) => {
 
       setLoading(false);
       setStage('complete');
+
+      // Add icon for rendering (AI-generated objects use Sparkles icon)
+      objectData.icon = Sparkles;
 
       const objectKey = input.toLowerCase().replace(/\s+/g, '_');
       onGenerate(objectKey, objectData);
