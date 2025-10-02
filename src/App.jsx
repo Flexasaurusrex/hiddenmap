@@ -993,7 +993,7 @@ const ObjectPromptModal = ({ onClose, onGenerate }) => {
     setStage('generating');
 
     try {
-      const response = await fetch('/api/generate-object', {
+      const response = await fetch('/.netlify/functions/generate-object', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
