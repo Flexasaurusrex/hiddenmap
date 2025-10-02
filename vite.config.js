@@ -9,14 +9,6 @@ export default defineConfig({
   build: {
     outDir: 'dist',
     minify: 'esbuild',
-    sourcemap: false,
-    rollupOptions: {
-      output: {
-        manualChunks: undefined
-      }
-    }
-  },
-  esbuild: {
-    jsxInject: "import React from 'react'"
+    sourcemap: false
   }
 })
