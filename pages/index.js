@@ -862,20 +862,20 @@ const GlobalSlide = ({ content }) => {
 const ClosingSlide = ({ content }) => {
   return (
     <div className="max-w-4xl px-8 text-center space-y-12">
-      <h2 className="text-6xl font-bold">This {content.name} Contains:</h2>
+      <h2 className="text-6xl font-bold">The Full Story of Your {content.name}</h2>
       <div className="space-y-6 text-2xl text-gray-300 leading-relaxed">
-        <p>Underground reserves from {content.footprint.countries} countries</p>
-        <p>Water that communities will never drink</p>
-        <p>Labor that carries both innovation and exploitation</p>
-        <p>The ingenuity of thousands of engineers</p>
-        <p>A material promise of the future built on the costs of the present</p>
+        <p>Materials from {content.footprint.countries} countries across the globe</p>
+        <p>The collaborative work of thousands of specialists</p>
+        <p>Engineering solutions refined over decades</p>
+        <p>Complex trade-offs between capability and consequence</p>
+        <p>A network of extraction, refinement, and manufacturing</p>
       </div>
       <div className="pt-12 space-y-6">
         <p className="text-3xl text-cyan-400 italic">
-          "Knowing this, how do you see this object now?"
+          "What surprised you most about this object's story?"
         </p>
         <p className="text-2xl text-gray-400 italic">
-          "What would it mean to truly value what you hold?"
+          "How does understanding its origins change your relationship with it?"
         </p>
       </div>
     </div>
