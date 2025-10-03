@@ -526,6 +526,15 @@ const App = () => {
     }));
   };
 
+  const addAndSelectObject = (objectKey, objectData) => {
+    setCustomObjects(prev => ({
+      ...prev,
+      [objectKey]: objectData
+    }));
+    setSelectedObject(objectData);
+    setView('object');
+  };
+
   const resetApp = () => {
     setView('home');
     setSelectedObject(null);
@@ -551,7 +560,7 @@ const App = () => {
           {view === 'home' && (
             <HomeView 
               selectObject={selectObject} 
-              addCustomObject={addCustomObject}
+              addAndSelectObject={addAndSelectObject}
               customObjects={customObjects}
             />
           )}
@@ -873,7 +882,7 @@ const ClosingSlide = ({ content }) => {
   );
 };
 
-const HomeView = ({ selectObject, addCustomObject, customObjects }) => {
+const HomeView = ({ selectObject, addAndSelectObject, customObjects }) => {
   const [showPrompt, setShowPrompt] = useState(false);
 
   return (
@@ -909,12 +918,7 @@ const HomeView = ({ selectObject, addCustomObject, customObjects }) => {
           <ObjectPromptModal 
             onClose={() => setShowPrompt(false)}
             onGenerate={(objectKey, objectData) => {
-              setCustomObjects(prev => ({
-                ...prev,
-                [objectKey]: objectData
-              }));
-              setSelectedObject(objectData);
-              setView('object');
+              addAndSelectObject(objectKey, objectData);
               setShowPrompt(false);
             }}
           />
