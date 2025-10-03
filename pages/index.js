@@ -603,6 +603,8 @@ const SlideshowView = ({ object, exitSlideshow }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
   const [fadeState, setFadeState] = useState('in');
+  const [touchStart, setTouchStart] = useState(0);
+  const [touchEnd, setTouchEnd] = useState(0);
 
   const slides = [
     {
@@ -643,6 +645,33 @@ const SlideshowView = ({ object, exitSlideshow }) => {
     }
   ];
 
+  // Swipe detection for mobile
+  const minSwipeDistance = 50;
+
+  const onTouchStart = (e) => {
+    setTouchEnd(0);
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    
+    if (isLeftSwipe && currentSlide < slides.length - 1) {
+      nextSlide();
+    }
+    if (isRightSwipe && currentSlide > 0) {
+      prevSlide();
+    }
+  };
+
   useEffect(() => {
     if (!isPlaying) return;
 
@@ -659,7 +688,7 @@ const SlideshowView = ({ object, exitSlideshow }) => {
     }, 10000);
 
     return () => clearTimeout(timer);
-  }, [currentSlide, isPlaying, slides.length]);
+  }, [currentSlide, isPlaying, slides.length, exitSlideshow]);
 
   const nextSlide = () => {
     setFadeState('out');
@@ -673,6 +702,16 @@ const SlideshowView = ({ object, exitSlideshow }) => {
     }, 1500);
   };
 
+  const prevSlide = () => {
+    setFadeState('out');
+    setTimeout(() => {
+      if (currentSlide > 0) {
+        setCurrentSlide(prev => prev - 1);
+      }
+      setFadeState('in');
+    }, 1500);
+  };
+
   const togglePlay = () => {
     setIsPlaying(!isPlaying);
   };
@@ -680,43 +719,56 @@ const SlideshowView = ({ object, exitSlideshow }) => {
   const currentSlideData = slides[currentSlide];
 
   return (
-    <div className="fixed inset-0 bg-black z-50 flex flex-col">
-      <div className="absolute top-0 left-0 right-0 z-50 bg-gradient-to-b from-black/80 to-transparent p-6">
+    <div 
+      className="fixed inset-0 bg-black z-50 flex flex-col"
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      style={{ 
+        height: '100dvh',
+        WebkitOverflowScrolling: 'touch'
+      }}
+    >
+      {/* Header - mobile optimized */}
+      <div className="absolute top-0 left-0 right-0 z-50 bg-gradient-to-b from-black/80 to-transparent p-3 sm:p-6">
         <div className="max-w-6xl mx-auto flex items-center justify-between">
           <button
             onClick={exitSlideshow}
-            className="flex items-center gap-2 text-white/80 hover:text-white transition-colors"
+            className="flex items-center gap-1 sm:gap-2 text-white/80 hover:text-white transition-colors"
           >
-            <X className="w-6 h-6" />
-            <span className="text-sm">Exit Presentation</span>
+            <X className="w-5 h-5 sm:w-6 sm:h-6" />
+            <span className="text-xs sm:text-sm hidden sm:inline">Exit Presentation</span>
+            <span className="text-xs sm:hidden">Exit</span>
           </button>
           
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <button
               onClick={togglePlay}
-              className="text-white/80 hover:text-white transition-colors"
+              className="text-white/80 hover:text-white transition-colors p-1 sm:p-0"
             >
-              {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6" />}
+              {isPlaying ? <Pause className="w-5 h-5 sm:w-6 sm:h-6" /> : <Play className="w-5 h-5 sm:w-6 sm:h-6" />}
             </button>
             <button
               onClick={nextSlide}
-              className="text-white/80 hover:text-white transition-colors"
+              className="text-white/80 hover:text-white transition-colors p-1 sm:p-0"
             >
-              <SkipForward className="w-6 h-6" />
+              <SkipForward className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
           </div>
         </div>
       </div>
 
-      <div className="absolute top-20 left-0 right-0 h-1 bg-white/10">
+      {/* Progress bar */}
+      <div className="absolute top-12 sm:top-20 left-0 right-0 h-1 bg-white/10">
         <div 
           className="h-full bg-cyan-500 transition-all duration-300"
           style={{ width: `${((currentSlide + 1) / slides.length) * 100}%` }}
         />
       </div>
 
+      {/* Slide container - with overflow handling for mobile */}
       <div 
-        className={`flex-1 flex items-center justify-center transition-opacity duration-[1500ms] ease-in-out ${
+        className={`flex-1 flex items-center justify-center overflow-y-auto py-16 sm:py-24 transition-opacity duration-[1500ms] ease-in-out ${
           fadeState === 'in' ? 'opacity-100' : 'opacity-0'
         }`}
       >
@@ -737,7 +789,8 @@ const SlideshowView = ({ object, exitSlideshow }) => {
         )}
       </div>
 
-      <div className="absolute bottom-6 right-6 text-white/50 text-sm">
+      {/* Slide counter - mobile optimized */}
+      <div className="absolute bottom-3 right-3 sm:bottom-6 sm:right-6 text-white/50 text-xs sm:text-sm">
         {currentSlide + 1} / {slides.length}
       </div>
     </div>
@@ -747,16 +800,20 @@ const SlideshowView = ({ object, exitSlideshow }) => {
 const OpeningSlide = ({ content }) => {
   const IconComponent = content.icon || Sparkles;
   return (
-    <div className="max-w-4xl px-8 text-center space-y-8 relative">
+    <div className="max-w-4xl px-4 sm:px-6 md:px-8 text-center space-y-4 sm:space-y-6 md:space-y-8 relative">
       {content.heroImage === "ai-generated" && (
         <div className="absolute inset-0 -z-10 opacity-20">
           <div className="w-full h-full bg-gradient-to-br from-cyan-500/20 to-purple-500/20 blur-3xl" />
         </div>
       )}
-      <IconComponent className="w-32 h-32 mx-auto text-cyan-400" />
-      <h1 className="text-7xl font-bold tracking-tight">{content.title}</h1>
-      <p className="text-3xl text-cyan-400">{content.tagline}</p>
-      <p className="text-xl text-gray-300 leading-relaxed max-w-3xl mx-auto">
+      <IconComponent className="w-16 h-16 sm:w-24 sm:h-24 md:w-32 md:h-32 mx-auto text-cyan-400" />
+      <h1 className="text-3xl sm:text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight leading-tight">
+        {content.title}
+      </h1>
+      <p className="text-lg sm:text-2xl md:text-3xl text-cyan-400 leading-snug">
+        {content.tagline}
+      </p>
+      <p className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300 leading-relaxed max-w-3xl mx-auto">
         {content.description}
       </p>
     </div>
@@ -765,35 +822,41 @@ const OpeningSlide = ({ content }) => {
 
 const MetalSlide = ({ content }) => {
   return (
-    <div className="max-w-5xl px-8 space-y-8 relative">
+    <div className="max-w-5xl px-4 sm:px-6 md:px-8 space-y-4 sm:space-y-6 md:space-y-8 relative">
       {content.visualImage === "ai-generated" && (
         <div className="absolute inset-0 -z-10 opacity-10">
           <div className="w-full h-full bg-gradient-to-br from-orange-500/30 to-red-500/30 blur-3xl" />
         </div>
       )}
       
-      <div className="flex items-center justify-center gap-6 mb-12">
-        <div className="text-8xl">{content.emoji}</div>
-        <div>
-          <h2 className="text-6xl font-bold">{content.name}</h2>
-          <p className="text-2xl text-gray-400">{content.symbol}</p>
+      <div className="flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 md:gap-6 mb-6 sm:mb-8 md:mb-12">
+        <div className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl">{content.emoji}</div>
+        <div className="text-center sm:text-left">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+            {content.name}
+          </h2>
+          <p className="text-lg sm:text-xl md:text-2xl text-gray-400">{content.symbol}</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-8">
-        <div className="bg-cyan-900/30 border-2 border-cyan-600/50 rounded-xl p-8 backdrop-blur">
-          <h3 className="text-2xl font-bold mb-4 text-cyan-400">The Function</h3>
-          <p className="text-lg leading-relaxed">{content.function}</p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
+        <div className="bg-cyan-900/30 border-2 border-cyan-600/50 rounded-xl p-4 sm:p-6 md:p-8 backdrop-blur">
+          <h3 className="text-lg sm:text-xl md:text-2xl font-bold mb-2 sm:mb-3 md:mb-4 text-cyan-400">
+            The Function
+          </h3>
+          <p className="text-sm sm:text-base md:text-lg leading-relaxed">{content.function}</p>
         </div>
 
-        <div className="bg-red-900/30 border-2 border-red-600/50 rounded-xl p-8 backdrop-blur">
-          <h3 className="text-2xl font-bold mb-4 text-red-400">The Cost</h3>
-          <p className="text-lg leading-relaxed">{content.impact}</p>
+        <div className="bg-red-900/30 border-2 border-red-600/50 rounded-xl p-4 sm:p-6 md:p-8 backdrop-blur">
+          <h3 className="text-lg sm:text-xl md:text-2xl font-bold mb-2 sm:mb-3 md:mb-4 text-red-400">
+            The Cost
+          </h3>
+          <p className="text-sm sm:text-base md:text-lg leading-relaxed">{content.impact}</p>
         </div>
       </div>
 
-      <div className="bg-purple-900/30 border-2 border-purple-600/50 rounded-xl p-8 text-center backdrop-blur">
-        <p className="text-2xl italic text-purple-300 leading-relaxed">
+      <div className="bg-purple-900/30 border-2 border-purple-600/50 rounded-xl p-4 sm:p-6 md:p-8 text-center backdrop-blur">
+        <p className="text-base sm:text-lg md:text-xl lg:text-2xl italic text-purple-300 leading-relaxed">
           {content.wonder}
         </p>
       </div>
@@ -803,31 +866,49 @@ const MetalSlide = ({ content }) => {
 
 const ImpactSlide = ({ content }) => {
   return (
-    <div className="max-w-5xl px-8">
-      <h2 className="text-6xl font-bold text-center mb-16">The True Cost</h2>
-      <div className="grid grid-cols-2 gap-8">
-        <div className="bg-blue-900/30 border-2 border-blue-600/50 rounded-xl p-12 text-center backdrop-blur">
-          <Droplets className="w-16 h-16 text-blue-400 mx-auto mb-6" />
-          <div className="text-5xl font-bold mb-4">{content.water}</div>
-          <div className="text-xl text-gray-300">Water consumed</div>
+    <div className="max-w-5xl px-4 sm:px-6 md:px-8">
+      <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-center mb-8 sm:mb-12 md:mb-16">
+        The True Cost
+      </h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 md:gap-8">
+        <div className="bg-blue-900/30 border-2 border-blue-600/50 rounded-xl p-6 sm:p-8 md:p-12 text-center backdrop-blur">
+          <Droplets className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 text-blue-400 mx-auto mb-3 sm:mb-4 md:mb-6" />
+          <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3 md:mb-4">
+            {content.water}
+          </div>
+          <div className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300">
+            Water consumed
+          </div>
         </div>
 
-        <div className="bg-orange-900/30 border-2 border-orange-600/50 rounded-xl p-12 text-center backdrop-blur">
-          <Flame className="w-16 h-16 text-orange-400 mx-auto mb-6" />
-          <div className="text-5xl font-bold mb-4">{content.co2}</div>
-          <div className="text-xl text-gray-300">CO₂ emissions</div>
+        <div className="bg-orange-900/30 border-2 border-orange-600/50 rounded-xl p-6 sm:p-8 md:p-12 text-center backdrop-blur">
+          <Flame className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 text-orange-400 mx-auto mb-3 sm:mb-4 md:mb-6" />
+          <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3 md:mb-4">
+            {content.co2}
+          </div>
+          <div className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300">
+            CO₂ emissions
+          </div>
         </div>
 
-        <div className="bg-purple-900/30 border-2 border-purple-600/50 rounded-xl p-12 text-center backdrop-blur">
-          <Users className="w-16 h-16 text-purple-400 mx-auto mb-6" />
-          <div className="text-5xl font-bold mb-4">{content.laborHours}</div>
-          <div className="text-xl text-gray-300">Human labor hours</div>
+        <div className="bg-purple-900/30 border-2 border-purple-600/50 rounded-xl p-6 sm:p-8 md:p-12 text-center backdrop-blur">
+          <Users className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 text-purple-400 mx-auto mb-3 sm:mb-4 md:mb-6" />
+          <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3 md:mb-4">
+            {content.laborHours}
+          </div>
+          <div className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300">
+            Human labor hours
+          </div>
         </div>
 
-        <div className="bg-red-900/30 border-2 border-red-600/50 rounded-xl p-12 text-center backdrop-blur">
-          <Factory className="w-16 h-16 text-red-400 mx-auto mb-6" />
-          <div className="text-5xl font-bold mb-4">{content.conflictMinerals}</div>
-          <div className="text-xl text-gray-300">Conflict minerals</div>
+        <div className="bg-red-900/30 border-2 border-red-600/50 rounded-xl p-6 sm:p-8 md:p-12 text-center backdrop-blur">
+          <Factory className="w-10 h-10 sm:w-12 sm:h-12 md:w-16 md:h-16 text-red-400 mx-auto mb-3 sm:mb-4 md:mb-6" />
+          <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3 md:mb-4">
+            {content.conflictMinerals}
+          </div>
+          <div className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-300">
+            Conflict minerals
+          </div>
         </div>
       </div>
     </div>
@@ -836,21 +917,23 @@ const ImpactSlide = ({ content }) => {
 
 const GlobalSlide = ({ content }) => {
   return (
-    <div className="max-w-5xl px-8 text-center space-y-12">
-      <Globe className="w-32 h-32 mx-auto text-cyan-400" />
-      <h2 className="text-6xl font-bold">A Global Network</h2>
-      <p className="text-4xl text-cyan-400">
+    <div className="max-w-5xl px-4 sm:px-6 md:px-8 text-center space-y-6 sm:space-y-8 md:space-y-12">
+      <Globe className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 mx-auto text-cyan-400" />
+      <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold">
+        A Global Network
+      </h2>
+      <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl text-cyan-400">
         {content.countries} countries. {content.locations.length} mining regions.
       </p>
-      <div className="grid grid-cols-4 gap-4 max-w-4xl mx-auto pt-8">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3 md:gap-4 max-w-4xl mx-auto pt-4 sm:pt-6 md:pt-8">
         {content.locations.map((location, idx) => (
           <div
             key={idx}
-            className="bg-cyan-900/30 border border-cyan-600/50 rounded-lg p-4 backdrop-blur"
+            className="bg-cyan-900/30 border border-cyan-600/50 rounded-lg p-2 sm:p-3 md:p-4 backdrop-blur"
           >
-            <div className="flex items-center gap-3">
-              <MapPin className="w-6 h-6 text-cyan-400" />
-              <span className="font-semibold">{location}</span>
+            <div className="flex items-center gap-1 sm:gap-2 md:gap-3 justify-center">
+              <MapPin className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-cyan-400 flex-shrink-0" />
+              <span className="font-semibold text-xs sm:text-sm md:text-base">{location}</span>
             </div>
           </div>
         ))}
@@ -861,20 +944,22 @@ const GlobalSlide = ({ content }) => {
 
 const ClosingSlide = ({ content }) => {
   return (
-    <div className="max-w-4xl px-8 text-center space-y-12">
-      <h2 className="text-6xl font-bold">The Full Story of Your {content.name}</h2>
-      <div className="space-y-6 text-2xl text-gray-300 leading-relaxed">
+    <div className="max-w-4xl px-4 sm:px-6 md:px-8 text-center space-y-6 sm:space-y-8 md:space-y-12">
+      <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
+        The Full Story of Your {content.name}
+      </h2>
+      <div className="space-y-3 sm:space-y-4 md:space-y-6 text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 leading-relaxed">
         <p>Materials from {content.footprint.countries} countries across the globe</p>
         <p>The collaborative work of thousands of specialists</p>
         <p>Engineering solutions refined over decades</p>
         <p>Complex trade-offs between capability and consequence</p>
         <p>A network of extraction, refinement, and manufacturing</p>
       </div>
-      <div className="pt-12 space-y-6">
-        <p className="text-3xl text-cyan-400 italic">
+      <div className="pt-6 sm:pt-8 md:pt-12 space-y-4 sm:space-y-5 md:space-y-6">
+        <p className="text-xl sm:text-2xl md:text-3xl text-cyan-400 italic leading-snug">
           "What surprised you most about this object's story?"
         </p>
-        <p className="text-2xl text-gray-400 italic">
+        <p className="text-lg sm:text-xl md:text-2xl text-gray-400 italic leading-snug">
           "How does understanding its origins change your relationship with it?"
         </p>
       </div>
@@ -1002,7 +1087,6 @@ const ObjectPromptModal = ({ onClose, onGenerate }) => {
     setStage('generating');
 
     try {
-      // CHANGED: /api/generate-object instead of /.netlify/functions/generate-object
       const response = await fetch('/api/generate-object', {
         method: 'POST',
         headers: {
@@ -1018,20 +1102,13 @@ const ObjectPromptModal = ({ onClose, onGenerate }) => {
       }
 
       const objectData = await response.json();
-
-      // Add icon immediately after parsing
       objectData.icon = Sparkles;
 
       setLoading(false);
       setStage('complete');
 
-      // Generate URL-safe key
       const objectKey = input.toLowerCase().replace(/\s+/g, '_');
-      
-      // Pass to parent through callback
       onGenerate(objectKey, objectData);
-      
-      // Close the modal
       onClose();
 
     } catch (error) {
