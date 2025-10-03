@@ -909,8 +909,13 @@ const HomeView = ({ selectObject, addCustomObject, customObjects }) => {
           <ObjectPromptModal 
             onClose={() => setShowPrompt(false)}
             onGenerate={(objectKey, objectData) => {
-              addCustomObject(objectKey, objectData);
-              selectObject(objectKey);
+              setCustomObjects(prev => ({
+                ...prev,
+                [objectKey]: objectData
+              }));
+              setSelectedObject(objectData);
+              setView('object');
+              setShowPrompt(false);
             }}
           />
         )}
