@@ -943,25 +943,93 @@ const GlobalSlide = ({ content }) => {
 };
 
 const ClosingSlide = ({ content }) => {
+  // Generate dynamic closing content based on the object
+  const getClosingNarrative = () => {
+    const footprint = content.footprint;
+    const name = content.name.toLowerCase();
+    
+    // Determine scale descriptors
+    const scaleDescriptor = footprint.countries > 30 ? "vast global network" :
+                           footprint.countries > 20 ? "extensive international supply chain" :
+                           footprint.countries > 10 ? "worldwide production network" :
+                           "multi-continental supply chain";
+    
+    const waterImpact = footprint.water.includes('million') ? "massive water consumption" :
+                       footprint.water.includes('000,') ? "significant water use" :
+                       "notable water requirements";
+    
+    const conflictLevel = footprint.conflictMinerals > 2 ? "multiple conflict zones" :
+                         footprint.conflictMinerals > 0 ? "regions affected by resource conflicts" :
+                         "global mining operations";
+    
+    // Generate unique narrative points
+    return [
+      `Your ${name} connects ${footprint.countries} countries through a ${scaleDescriptor}`,
+      `${footprint.laborHours} hours of human labor—from miners to engineers to assembly workers—in its creation`,
+      `${waterImpact} of ${footprint.water} and ${footprint.co2} of carbon emissions in production`,
+      `${conflictLevel} that supply the critical materials inside`,
+      `Recycling potential of ${footprint.recyclable.split('—')[0]}—but current recovery rates tell a different story`
+    ];
+  };
+  
+  const getReflectionQuestions = () => {
+    const name = content.name.toLowerCase();
+    const footprint = content.footprint;
+    
+    // Generate object-specific questions
+    const questions = [];
+    
+    // First question based on object type and scale
+    if (footprint.conflictMinerals > 2) {
+      questions.push(`How does knowing about the ${footprint.conflictMinerals} conflict zones tied to your ${name} influence your view of its value?`);
+    } else if (footprint.laborHours > 1000) {
+      questions.push(`What does it mean that ${footprint.laborHours} hours of human work went into creating your ${name}?`);
+    } else if (footprint.water.includes('million')) {
+      questions.push(`Does ${footprint.water} of water seem like a reasonable cost for your ${name}?`);
+    } else {
+      questions.push(`Knowing the ${footprint.countries}-country journey of your ${name}, does it change how you use it?`);
+    }
+    
+    // Second question based on recyclability and lifecycle
+    const recyclePct = footprint.recyclable.match(/\d+%/)?.[0] || '';
+    if (recyclePct) {
+      questions.push(`With ${recyclePct} recyclability, what responsibility do you have when this ${name} reaches end-of-life?`);
+    } else if (name.includes('fashion') || name.includes('shirt')) {
+      questions.push(`How many uses justify the global footprint of a ${name}?`);
+    } else if (name.includes('vehicle') || name.includes('turbine')) {
+      questions.push(`Does the long-term benefit of this ${name} outweigh its production impact?`);
+    } else {
+      questions.push(`What would meaningful stewardship of this ${name} look like in practice?`);
+    }
+    
+    return questions;
+  };
+  
+  const narrativePoints = getClosingNarrative();
+  const questions = getReflectionQuestions();
+  
   return (
     <div className="max-w-4xl px-4 sm:px-6 md:px-8 text-center space-y-6 sm:space-y-8 md:space-y-12">
       <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold leading-tight">
-        The Full Story of Your {content.name}
+        The Global Scale of Your {content.name}
       </h2>
       <div className="space-y-3 sm:space-y-4 md:space-y-6 text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 leading-relaxed">
-        <p>Materials from {content.footprint.countries} countries across the globe</p>
-        <p>The collaborative work of thousands of specialists</p>
-        <p>Engineering solutions refined over decades</p>
-        <p>Complex trade-offs between capability and consequence</p>
-        <p>A network of extraction, refinement, and manufacturing</p>
+        {narrativePoints.map((point, idx) => (
+          <p key={idx}>{point}</p>
+        ))}
       </div>
       <div className="pt-6 sm:pt-8 md:pt-12 space-y-4 sm:space-y-5 md:space-y-6">
-        <p className="text-xl sm:text-2xl md:text-3xl text-cyan-400 italic leading-snug">
-          "What surprised you most about this object's story?"
-        </p>
-        <p className="text-lg sm:text-xl md:text-2xl text-gray-400 italic leading-snug">
-          "How does understanding its origins change your relationship with it?"
-        </p>
+        {questions.map((question, idx) => (
+          <p 
+            key={idx}
+            className={idx === 0 ? 
+              "text-xl sm:text-2xl md:text-3xl text-cyan-400 italic leading-snug" :
+              "text-lg sm:text-xl md:text-2xl text-gray-400 italic leading-snug"
+            }
+          >
+            "{question}"
+          </p>
+        ))}
       </div>
     </div>
   );
@@ -1498,6 +1566,47 @@ const WorldMapView = ({ object, setView }) => {
 };
 
 const ReflectionView = ({ object, resetApp }) => {
+  // Generate contextual descriptions for metrics
+  const getMetricContext = () => {
+    const name = object.name.toLowerCase();
+    
+    // Determine if it's a single-unit or mass-production item
+    const isMassProduction = name.includes('shirt') || name.includes('phone') || name.includes('laptop');
+    const isInfrastructure = name.includes('turbine') || name.includes('vehicle');
+    const isPanel = name.includes('panel');
+    
+    let laborContext = '';
+    if (isMassProduction) {
+      laborContext = 'Estimated human effort per unit—from mining to final assembly';
+    } else if (isInfrastructure) {
+      laborContext = 'Total specialized labor—engineering, manufacturing, and installation';
+    } else if (isPanel) {
+      laborContext = 'Per-panel labor—silicon refinement, cell production, and assembly';
+    } else {
+      laborContext = 'Cumulative human effort across the entire production chain';
+    }
+    
+    let waterContext = '';
+    if (object.footprint.water.includes('million')) {
+      waterContext = 'Industrial-scale water consumption—mining, refinement, and cooling';
+    } else if (parseInt(object.footprint.water.replace(/,/g, '')) > 50000) {
+      waterContext = 'Significant water use—primarily in material extraction and processing';
+    } else {
+      waterContext = 'Water footprint—extraction, manufacturing, and production processes';
+    }
+    
+    let carbonContext = '';
+    if (object.footprint.co2.includes('tons')) {
+      carbonContext = 'Major carbon footprint—energy-intensive smelting and manufacturing';
+    } else {
+      carbonContext = 'Embedded carbon—from energy used in mining, transport, and production';
+    }
+    
+    return { laborContext, waterContext, carbonContext };
+  };
+  
+  const context = getMetricContext();
+  
   return (
     <div className="min-h-screen p-8 flex items-center justify-center">
       <div className="max-w-4xl w-full space-y-12">
@@ -1508,60 +1617,78 @@ const ReflectionView = ({ object, resetApp }) => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="bg-gray-800/50 backdrop-blur border border-gray-700 rounded-xl p-6">
-            <h3 className="text-lg font-semibold mb-4 text-cyan-400">Geographic Reach</h3>
+            <h3 className="text-lg font-semibold mb-2 text-cyan-400">Geographic Reach</h3>
+            <p className="text-xs text-gray-500 mb-4">Global supply chain footprint</p>
             <div className="space-y-3 text-gray-300">
-              <div className="flex justify-between">
-                <span>Countries of origin:</span>
-                <span className="font-bold">{object.footprint.countries}</span>
+              <div className="flex justify-between items-baseline">
+                <span className="text-sm">Countries involved:</span>
+                <span className="font-bold text-2xl">{object.footprint.countries}</span>
               </div>
+              <p className="text-xs text-gray-400 leading-relaxed">
+                From raw material extraction to component manufacturing—spanning {object.footprint.countries} nations across multiple continents
+              </p>
             </div>
           </div>
 
           <div className="bg-gray-800/50 backdrop-blur border border-gray-700 rounded-xl p-6">
-            <h3 className="text-lg font-semibold mb-4 text-blue-400">Environmental Cost</h3>
+            <h3 className="text-lg font-semibold mb-2 text-blue-400">Environmental Cost</h3>
+            <p className="text-xs text-gray-500 mb-4">{context.waterContext}</p>
             <div className="space-y-3 text-gray-300">
-              <div className="flex justify-between">
-                <span>Water consumed:</span>
-                <span className="font-bold">{object.footprint.water}</span>
+              <div className="flex justify-between items-baseline">
+                <span className="text-sm">Water consumed:</span>
+                <span className="font-bold text-xl">{object.footprint.water}</span>
               </div>
-              <div className="flex justify-between">
-                <span>CO₂ emissions:</span>
-                <span className="font-bold">{object.footprint.co2}</span>
+              <div className="flex justify-between items-baseline">
+                <span className="text-sm">CO₂ emissions:</span>
+                <span className="font-bold text-xl">{object.footprint.co2}</span>
               </div>
+              <p className="text-xs text-gray-400 leading-relaxed">
+                {context.carbonContext}
+              </p>
             </div>
           </div>
 
           <div className="bg-gray-800/50 backdrop-blur border border-gray-700 rounded-xl p-6">
-            <h3 className="text-lg font-semibold mb-4 text-amber-400">Human Labor</h3>
+            <h3 className="text-lg font-semibold mb-2 text-amber-400">Human Labor</h3>
+            <p className="text-xs text-gray-500 mb-4">{context.laborContext}</p>
             <div className="space-y-3 text-gray-300">
-              <div className="flex justify-between">
-                <span>Labor hours:</span>
-                <span className="font-bold">{object.footprint.laborHours}</span>
+              <div className="flex justify-between items-baseline">
+                <span className="text-sm">Labor hours:</span>
+                <span className="font-bold text-2xl">{object.footprint.laborHours}</span>
               </div>
-              <div className="flex justify-between">
-                <span>Conflict minerals:</span>
-                <span className="font-bold">{object.footprint.conflictMinerals}</span>
+              <div className="flex justify-between items-baseline">
+                <span className="text-sm">Conflict mineral sources:</span>
+                <span className="font-bold text-2xl">{object.footprint.conflictMinerals}</span>
               </div>
+              <p className="text-xs text-gray-400 leading-relaxed">
+                {object.footprint.conflictMinerals > 0 
+                  ? `Materials sourced from ${object.footprint.conflictMinerals} regions affected by armed conflict or labor exploitation`
+                  : 'Supply chain includes regions with complex labor and environmental conditions'}
+              </p>
             </div>
           </div>
 
           <div className="bg-gray-800/50 backdrop-blur border border-gray-700 rounded-xl p-6">
-            <h3 className="text-lg font-semibold mb-4 text-green-400">Circularity</h3>
+            <h3 className="text-lg font-semibold mb-2 text-green-400">End-of-Life</h3>
+            <p className="text-xs text-gray-500 mb-4">Recovery potential vs. current reality</p>
             <div className="space-y-3 text-gray-300">
-              <div className="text-sm">{object.footprint.recyclable}</div>
+              <div className="text-sm leading-relaxed">{object.footprint.recyclable}</div>
+              <p className="text-xs text-gray-400 leading-relaxed">
+                Most materials are technically recyclable, but infrastructure, economics, and collection systems determine actual recovery rates
+              </p>
             </div>
           </div>
         </div>
 
         <div className="bg-gradient-to-br from-purple-900/30 to-indigo-900/30 border border-purple-700/50 rounded-xl p-8">
-          <h2 className="text-3xl font-bold mb-6 text-center">This {object.name.toLowerCase()} contains:</h2>
+          <h2 className="text-3xl font-bold mb-6 text-center">This {object.name.toLowerCase()} embodies:</h2>
           <div className="space-y-3 text-lg text-gray-300 leading-relaxed">
-            <p>• {object.metals[0].locations[0]}'s underground reserves</p>
-            <p>• The ingenuity of thousands of engineers</p>
-            <p>• Water that communities will never drink</p>
-            <p>• Labor that carries both innovation and exploitation</p>
-            <p>• The desire of billions of consumers</p>
-            <p>• A material promise of the future built on the costs of the present</p>
+            <p>• Geological resources from {object.metals[0].locations[0]} and beyond</p>
+            <p>• Engineering knowledge accumulated over decades of innovation</p>
+            <p>• Water drawn from ecosystems that may never recover</p>
+            <p>• Labor spanning from artisanal mines to advanced manufacturing facilities</p>
+            <p>• Market demand that shapes entire regional economies</p>
+            <p>• Trade-offs between capability, cost, and consequence</p>
           </div>
         </div>
 
@@ -1570,7 +1697,7 @@ const ReflectionView = ({ object, resetApp }) => {
             "Knowing this, how do you see this object now?"
           </p>
           <p className="text-xl text-gray-400">
-            "What would it mean to truly value what you hold?"
+            "What would meaningful stewardship look like?"
           </p>
         </div>
 
